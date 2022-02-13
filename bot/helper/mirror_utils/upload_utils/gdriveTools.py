@@ -115,6 +115,10 @@ class GoogleDriveHelper:
             self.total_time += self.update_interval
 
     def deletefile(self, link: str):
+        token_service = self.__alt_authorize()
+        if token_service is not None:
+           self.__service = token_service
+           return self.deletefile(link)
         try:
             file_id = self.__getIdFromUrl(link)
         except (KeyError, IndexError):
@@ -130,10 +134,7 @@ class GoogleDriveHelper:
                 msg = "No such file exist"
             elif "insufficientFilePermissions" in str(err):
                 msg = "Insufficient File Permissions"
-                token_service = self.__alt_authorize()
-                if token_service is not None:
-                    self.__service = token_service
-                    return self.deletefile(link)
+                
             else:
                 msg = str(err)
             LOGGER.error(f"Delete Result: {msg}")
